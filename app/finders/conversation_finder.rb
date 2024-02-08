@@ -28,7 +28,8 @@ class ConversationFinder
 
   # params
   # assignee_type, inbox_id, :status
-  ALLOWED_USER_ID = [2, 3, 4, 9, 11, 20, 26, 115].freeze
+  ALLOWED_USER_ID = [2, 3, 4, 9, 11, 20, 23, 26, 62, 63, 79, 80, 81, 82, 85, 91, 95, 104, 108, 111, 112, 113, 115, 116, 132, 133, 134, 135, 136, 137,
+                     141, 142, 143, 144].freeze
   def initialize(current_user, params)
     @current_user = current_user
     @current_account = current_user.account
