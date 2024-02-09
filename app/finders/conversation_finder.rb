@@ -28,8 +28,7 @@ class ConversationFinder
 
   # params
   # assignee_type, inbox_id, :status
-  ALLOWED_USER_ID = [2, 3, 4, 9, 11, 20, 23, 26, 62, 63, 79, 80, 81, 82, 85, 91, 95, 104, 108, 111, 112, 113, 115, 116, 132, 133, 134, 135, 136, 137,
-                     141, 142, 143, 144].freeze
+
   def initialize(current_user, params)
     @current_user = current_user
     @current_account = current_user.account
@@ -61,6 +60,7 @@ class ConversationFinder
     set_inboxes
     set_team
     set_assignee_type
+    set_custom_attributes
 
     find_all_conversations
     filter_by_status unless params[:q]
@@ -80,6 +80,11 @@ class ConversationFinder
 
   def set_assignee_type
     @assignee_type = params[:assignee_type]
+  end
+
+  def set_custom_attributes
+    @custom_attributes = @current_user.custom_attributes
+    @hide_tabs = @custom_attributes&.dig('hide_tabs') || false
   end
 
   def set_team
@@ -104,26 +109,26 @@ class ConversationFinder
   end
 
   def filter_for_unassigned
-    @conversations = if ALLOWED_USER_ID.include?(@current_user&.id)
-                       @conversations.unassigned
-                     else
+    @conversations = if @hide_tabs
                        []
+                     else
+                       @conversations.unassigned
                      end
   end
 
   def filter_for_assigned
-    @conversations = if ALLOWED_USER_ID.include?(@current_user&.id)
-                       @conversations.assigned
-                     else
+    @conversations = if @hide_tabs
                        []
+                     else
+                       @conversations.assigned
                      end
   end
 
   def filter_for_all
-    @conversations = if ALLOWED_USER_ID.include?(@current_user&.id)
-                       @conversations
-                     else
+    @conversations = if @hide_tabs
                        []
+                     else
+                       @conversations
                      end
   end
 
