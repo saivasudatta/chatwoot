@@ -363,11 +363,15 @@ export default {
       };
     },
     assigneeTabItems() {
-      const ASSIGNEE_TYPE_TAB_KEYS = {
+      let ASSIGNEE_TYPE_TAB_KEYS = {
         me: 'mineCount',
-        unassigned: 'unAssignedCount',
-        all: 'allCount',
       };
+
+      if (!this.currentUser.custom_attributes?.hide_tabs) {
+        ASSIGNEE_TYPE_TAB_KEYS.unassigned = 'unAssignedCount';
+        ASSIGNEE_TYPE_TAB_KEYS.all = 'allCount';
+      }
+
       return Object.keys(ASSIGNEE_TYPE_TAB_KEYS).map(key => {
         const count = this.conversationStats[ASSIGNEE_TYPE_TAB_KEYS[key]] || 0;
         return {
