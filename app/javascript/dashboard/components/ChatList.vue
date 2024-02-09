@@ -610,6 +610,10 @@ export default {
       this.showDeleteFoldersModal = false;
     },
     onToggleAdvanceFiltersModal() {
+      if (this.currentUser.custom_attributes?.hide_tabs) {
+        return;
+      }
+
       if (!this.hasAppliedFilters && !this.hasActiveFolders) {
         this.initializeExistingFilterToModal();
       }
