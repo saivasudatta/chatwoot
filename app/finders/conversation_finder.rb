@@ -60,6 +60,7 @@ class ConversationFinder
     set_inboxes
     set_team
     set_assignee_type
+    set_custom_attributes
 
     find_all_conversations
     filter_by_status unless params[:q]
@@ -81,6 +82,11 @@ class ConversationFinder
     @assignee_type = params[:assignee_type]
   end
 
+  def set_custom_attributes
+    @custom_attributes = @current_user.custom_attributes
+    @hide_tabs = @custom_attributes&.dig('hide_tabs') || false
+  end
+
   def set_team
     @team = current_account.teams.find(params[:team_id]) if params[:team_id]
   end
@@ -92,15 +98,38 @@ class ConversationFinder
   end
 
   def filter_by_assignee_type
-    case @assignee_type
-    when 'me'
-      @conversations = @conversations.assigned_to(current_user)
-    when 'unassigned'
-      @conversations = @conversations.unassigned
-    when 'assigned'
-      @conversations = @conversations.assigned
-    end
-    @conversations
+    return filter_for_me if @assignee_type == 'me'
+    return filter_for_unassigned if @assignee_type == 'unassigned'
+    return filter_for_assigned if @assignee_type == 'assigned'
+    return filter_for_all if @assignee_type == 'all'
+  end
+
+  def filter_for_me
+    @conversations = @conversations.assigned_to(current_user)
+  end
+
+  def filter_for_unassigned
+    @conversations = if @hide_tabs
+                       []
+                     else
+                       @conversations.unassigned
+                     end
+  end
+
+  def filter_for_assigned
+    @conversations = if @hide_tabs
+                       []
+                     else
+                       @conversations.assigned
+                     end
+  end
+
+  def filter_for_all
+    @conversations = if @hide_tabs
+                       []
+                     else
+                       @conversations
+                     end
   end
 
   def filter_by_conversation_type
@@ -164,6 +193,8 @@ class ConversationFinder
   end
 
   def conversations
+    return unless @conversations != []
+
     @conversations = @conversations.includes(
       :taggings, :inbox, { assignee: { avatar_attachment: [:blob] } }, { contact: { avatar_attachment: [:blob] } }, :team, :contact_inbox
     )
