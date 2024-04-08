@@ -11,6 +11,10 @@ class Conversations::FilterService < FilterService
     mine_count, unassigned_count, all_count, = set_count_for_all_conversations
     assigned_count = all_count - unassigned_count
 
+    filter_current_user = @user.custom_attributes&.dig('hide_tabs') || false
+
+    @conversations = @conversations.assigned_to(@user) if filter_current_user
+
     {
       conversations: conversations,
       count: {
