@@ -12,6 +12,13 @@ class Whatsapp::IncomingMessageWhatsappCloudService < Whatsapp::IncomingMessageB
     url_response = HTTParty.get(inbox.channel.media_url(attachment_payload[:id]), headers: inbox.channel.api_headers)
     # This url response will be failure if the access token has expired.
     inbox.channel.authorization_error! if url_response.unauthorized?
-    Down.download(url_response.parsed_response['url'], headers: inbox.channel.api_headers) if url_response.success?
+
+    return unless url_response.success?
+
+    path_and_query = url_response.parsed_response['url'].split('lookaside.fbsbx.com/')[1]
+
+    audio_url = "https://waba-v2.360dialog.io/#{path_and_query}"
+
+    Down.download(audio_url, headers: inbox.channel.api_headers)
   end
 end
